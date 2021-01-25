@@ -1,78 +1,47 @@
-var vertexShaderText = 
-[
-'precision mediump float;',
-'',
-'attribute vec2 vertPosition;',
-'attribute vec3 vertColor;',
-'varying vec3 fragColor;',
-'',
-'void main()',
-'{',
-'  fragColor = vertColor;',
-'  gl_Position = vec4(vertPosition, 0.0, 1.0);',
-'}'
-].join('\n');
+class App {
+    //for every new App it runs the constructor code
+    constructor() {
 
-var fragmentShaderText =
-[
-'precision mediump float;',
-'',
-'varying vec3 fragColor;',
-'void main()',
-'{',
-'  gl_FragColor = vec4(fragColor, 1.0);',
-'}'
-].join('\n');
+        //CREATE SCENE AND CAMERA
+        this.scene = new THREE.Scene(); //everithing in Three library is preceed by three
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000); //With perspective camera objects in the distance will appear smaller than objects in the foreground
+        //THREE.PerspectiveCamera(angle, aspect ratio, nearest point to render from camera, farthest.....) 
 
-var InitDemo = function () {
-	console.log('Hello World');
+        //CREATE RENDERER
+        this.renderer = new THREE.WebGLRenderer();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(this.renderer.domElement); //apend canvas to document body
 
-	var canvas = document.getElementById('Canvas_demo');
-	var gl = canvas.getContext('webgl');
+        //CREATE LIGHT
+        const light = new THREE.DirectionalLight("rgb(255, 255, 255)");
+        light.position.set(0, 20, 10); //x,y,z
+        const ambient = new THREE.AmbientLight("rgba(0, 112, 112, 0.44)"); // soft white light
 
-	if (!gl) {
-		console.log('WebGL not supported, falling back on experimental-webgl');
-		gl = canvas.getContext('experimental-webgl');
-	}
+        //CREATE GEOMETRY AND MATERIAL
+        const geometry = new THREE.BoxGeometry(1, 1, 1); //x,y,z
+        const material = new THREE.MeshPhongMaterial({ color: "rgb(0,170,255)" });
 
-	if (!gl) {
-		alert('Your browser does not support WebGL');
-	}
+        //CREATE MESH
+        this.cube = new THREE.Mesh(geometry, material);
 
-	gl.clearColor(1.0, 1.0, 1.0, 1.0); //
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        //ADD ELEMENTS TO SCENE
+        this.scene.add(this.cube);
+        this.scene.add(light);
+        this.scene.add(ambient);
 
-	//
-	// Create shaders
-	// 
-	var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-	var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+        this.camera.position.z = 3;
 
-	gl.shaderSource(vertexShader, vertexShaderText);
-	gl.shaderSource(fragmentShader, fragmentShaderText);
+        this.animate();
+    }
 
-	gl.compileShader(vertexShader);
-	if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-		console.error('ERROR compiling vertex shader!', gl.getShaderInfoLog(vertexShader));
-		return;
-	}
+    animate() {
+        const app = this;
+        //Calling repeatedly this method
+        requestAnimationFrame(function() { app.animate(); });
 
-	gl.compileShader(fragmentShader);
-	if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-		console.error('ERROR compiling fragment shader!', gl.getShaderInfoLog(fragmentShader));
-		return;
-	}
+        this.cube.rotation.x += 0.01;
+        this.cube.rotation.y += 0.01;
 
-	var program = gl.createProgram();
-	gl.attachShader(program, vertexShader);
-	gl.attachShader(program, fragmentShader);
-	gl.linkProgram(program);
-	if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-		console.error('ERROR linking program!', gl.getProgramInfoLog(program));
-		return;
-	}
-	gl.validateProgram(program);
-	if (!gl.getProgramParameter(program, gl.VALIDATE_STATUS)) {
-		console.error('ERROR validating program!', gl.getProgramInfoLog(program));
-		return;
-	}
+        this.renderer.render(this.scene, this.camera);
+    }
+}
