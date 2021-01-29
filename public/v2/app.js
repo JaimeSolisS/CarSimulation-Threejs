@@ -33,6 +33,8 @@ class App {
 
 
     initWorld() {
+        const app = this;
+
         const world = new CANNON.World(); //Nothing works in Cannon with out a world
         this.world = world; //make world an app property
 
@@ -59,13 +61,68 @@ class App {
         this.helper.addVisual(carBody, 'car');
 
         //CAR OBJECT
-        const car = new CANNON.RaycastVehicle({
+        const vehicle = new CANNON.RaycastVehicle({
             chassisBody: carBody,
             indexRightAxis: 0,
             indexUpAxis: 1,
             indeForwardAxis: 2
         });
-        car.addToWorld(world);
+
+        //WHEELS ->Code from cannon.js
+        const options = {
+            radius: 1,
+            directionLocal: new CANNON.Vec3(0, -1, 0),
+            suspensionStiffness: 30,
+            suspensionRestLength: 0.3,
+            frictionSlip: 5,
+            dampingRelaxation: 2.3,
+            dampingCompression: 4.4,
+            maxSuspensionForce: 100000,
+            rollInfluence: 0.01,
+            axleLocal: new CANNON.Vec3(-1, 0, 0),
+            chassisConnectionPointLocal: new CANNON.Vec3(1, 1, 0),
+            maxSuspensionTravel: 0.3,
+            customSlidingRotationalSpeed: -30,
+            useCustomSlidingRotationalSpeed: true
+        };
+
+        //WHEELS POSITION
+        options.chassisConnectionPointLocal.set(2, -1, -2);
+        vehicle.addWheel(options);
+        options.chassisConnectionPointLocal.set(-2, -1, -2);
+        vehicle.addWheel(options);
+        options.chassisConnectionPointLocal.set(2, -1, 2);
+        vehicle.addWheel(options);
+        options.chassisConnectionPointLocal.set(-2, -1, 2);
+        vehicle.addWheel(options);
+
+        vehicle.addToWorld(world);
+
+        //CANNON functions ->Code from cannon.js
+        const wheelBodies = [];
+        vehicle.wheelInfos.forEach(function(wheel) {
+            const cylinderShape = new CANNON.Cylinder(wheel.radius, wheel.radius, wheel.radius / 2, 20);
+            const wheelBody = new CANNON.Body({ mass: 1, material: wheelMaterial });
+            const q = new CANNON.Quaternion();
+            q.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), Math.PI / 2);
+            wheelBody.addShape(cylinderShape, new CANNON.Vec3(), q);
+            wheelBodies.push(wheelBody);
+            app.helper.addVisual(wheelBody, 'wheel');
+        });
+
+        // Update wheels ->Code from cannon.js
+        world.addEventListener('postStep', function() {
+            let index = 0;
+            app.vehicle.wheelInfos.forEach(function(wheel) {
+                app.vehicle.updateWheelTransform(index);
+                const t = wheel.worldTransform;
+                wheelBodies[index].threemesh.position.copy(t.position);
+                wheelBodies[index].threemesh.quaternion.copy(t.quaternion);
+                index++;
+            });
+        });
+
+        this.vehicle = vehicle;
 
         //GROUND
         const groundShape = new CANNON.Plane(); //Flat Horizontal plane
@@ -79,9 +136,9 @@ class App {
     }
 
     animate() {
-        const game = this;
+        const app = this;
         requestAnimationFrame(function() {
-            game.animate();
+            app.animate();
         });
 
         this.world.step(this.fixedTimeStep);
@@ -156,7 +213,7 @@ class Auxiliar {
     shape2Mesh(body, castShadow, receiveShadow) {
         const obj = new THREE.Object3D();
         const material = this.currentMaterial;
-        const game = this;
+        const app = this;
         let index = 0;
 
         body.shapes.forEach(function(shape) {
@@ -172,7 +229,7 @@ class Auxiliar {
                     break;
 
                 case CANNON.Shape.types.PARTICLE:
-                    mesh = new THREE.Mesh(game.particleGeo, game.particleMaterial);
+                    mesh = new THREE.Mesh(app.particleGeo, app.particleMaterial);
                     const s = this.settings;
                     mesh.scale.set(s.particleSize, s.particleSize, s.particleSize);
                     break;
