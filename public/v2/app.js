@@ -9,24 +9,24 @@ class App {
         this.scene.background = new THREE.Color(0, 0, 0); //Set background to black
 
         //CREATE CAMERA
-        this.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.camera.position.set(0, 2, 8);
-        this.camera.lookAt(new THREE.Vector3(0, 1, 0));
+        this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 2000);
+        this.camera.position.set(0, 3, 10);
+
+        // LIGHTS
+        const ambient = new THREE.AmbientLight("rgb(136,136,136)");
+        this.scene.add(ambient);
+        const light = new THREE.DirectionalLight("rgb(221,221,221)");
+        light.position.set(3, 10, 4);
+        light.target.position.set(0, 0, 0);
+        this.scene.add(light);
 
         //CREATE RENDERER
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(this.renderer.domElement);
 
-        //SET LIGHTS
-        const ambient = new THREE.AmbientLight("rgb(136,136,136");
-        this.scene.add(ambient);
-        const light = new THREE.DirectionalLight("rgb(221,221,221");
-        light.position.set(3, 10, 4);
-        light.target.position.set(0, 0, 0);
-
-
         this.helper = new Auxiliar(this.scene);
+        this.fixedTimeStep = 1.0 / 60.0;
 
         this.initWorld();
     }
@@ -39,17 +39,42 @@ class App {
         world.broadphase = new CANNON.NaiveBroadphase(); //Collision detection
         world.gravity.set(0, -10, 0); //WebGL orientation gravity on Y axis
 
-        //The fundamentals things of cannon are Shapes, Bodies and Materials
+        //GROUND MATERIAL
+        const groundMaterial = new CANNON.Material("groundMaterial");
+        const wheelMaterial = new CANNON.Material("wheelMaterial");
+        const wheelGroundContactMaterial = new CANNON.ContactMaterial(wheelMaterial, groundMaterial, {
+            friction: 0.3,
+            restitution: 0,
+            contactEquationStiffness: 1000
+        });
+
+        // We must add the contact materials to the world
+        world.addContactMaterial(wheelGroundContactMaterial);
+
+        //CAR SHAPE
+        const carShape = new CANNON.Box(new CANNON.Vec3(2, 1, 3));
+        const carBody = new CANNON.Body({ mass: 150, material: groundMaterial });
+        carBody.addShape(carShape);
+        carBody.position.set(0, 10, 0);
+        this.helper.addVisual(carBody, 'car');
+
+        //CAR OBJECT
+        const car = new CANNON.RaycastVehicle({
+            chassisBody: carBody,
+            indexRightAxis: 0,
+            indexUpAxis: 1,
+            indeForwardAxis: 2
+        });
+        car.addToWorld(world);
+
+        //GROUND
         const groundShape = new CANNON.Plane(); //Flat Horizontal plane
-        const groundMaterial = new CANNON.Material();
         const groundBody = new CANNON.Body({ mass: 0, material: groundMaterial }); //mass of O means that it will be static. 
         groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2); //rotate around x axis 90 degrees
         groundBody.addShape(groundShape);
         world.add(groundBody);
-
         this.helper.addVisual(groundBody, 'ground', false, true);
         this.groundMaterial = groundMaterial; //ground material is an app property
-
         this.animate();
     }
 
@@ -63,7 +88,6 @@ class App {
 
         this.updateBodies(this.world);
 
-
         this.renderer.render(this.scene, this.camera);
     }
 
@@ -76,9 +100,6 @@ class App {
         });
     }
 }
-
-
-
 
 //Functions from cannon.demo.js library ->Still trying to figure it out how they work
 class Auxiliar {
