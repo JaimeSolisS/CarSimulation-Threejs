@@ -20,9 +20,10 @@ class App {
         const light = new THREE.DirectionalLight("rgb(255, 255, 255)");
         light.position.set(300, 300, 300);
 
+        /*
         const directionalLightHelper = new THREE.DirectionalLightHelper(light);
         this.scene.add(directionalLightHelper);
-
+        */
 
         const ambient = new THREE.AmbientLight("rgb(0, 112, 112)", 0.5);
         this.scene.add(light);
