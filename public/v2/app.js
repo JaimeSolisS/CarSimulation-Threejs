@@ -1,6 +1,7 @@
 class App {
     constructor() {
         this.init();
+
     }
 
     init() {
@@ -45,7 +46,7 @@ class App {
         const groundMaterial = new CANNON.Material("groundMaterial");
         const wheelMaterial = new CANNON.Material("wheelMaterial");
         const wheelGroundContactMaterial = new CANNON.ContactMaterial(wheelMaterial, groundMaterial, {
-            friction: 0.3,
+            friction: 1000,
             restitution: 0,
             contactEquationStiffness: 1000
         });
@@ -132,8 +133,65 @@ class App {
         world.add(groundBody);
         this.helper.addVisual(groundBody, 'ground', false, true);
         this.groundMaterial = groundMaterial; //ground material is an app property
+
+
         this.animate();
     }
+
+    moveCar() {
+        const self = this;
+        document.addEventListener('keydown', function(event) {
+
+            var maxSteerVal = .5;
+            var maxForce = 500;
+            var breakForce = 100;
+
+            self.vehicle.setBrake(0, 0);
+            self.vehicle.setBrake(0, 1);
+            self.vehicle.setBrake(0, 3);
+            self.vehicle.setBrake(0, 2);
+
+            if (event.key) {
+                switch (event.key) {
+
+                    case "ArrowUp": // forward
+                        console.log("Avanza");
+                        self.vehicle.applyEngineForce(up ? 0 : -maxForce, 2);
+                        self.vehicle.applyEngineForce(up ? 0 : -maxForce, 3);
+                        break;
+
+                    case "ArrowDown": // backward
+                        self.vehicle.applyEngineForce(up ? 0 : maxForce, 2);
+                        self.vehicle.applyEngineForce(up ? 0 : maxForce, 3);
+                        break;
+
+                    case " ": //b
+                        self.vehicle.setBrake(breakForce, 0);
+                        self.vehicle.setBrake(breakForce, 1);
+                        self.vehicle.setBrake(breakForce, 2);
+                        self.vehicle.setBrake(breakForce, 3);
+                        break;
+                    case "ArrowRight": // right
+                        self.vehicle.setSteeringValue(up ? 0 : -maxSteerVal, 0);
+                        self.vehicle.setSteeringValue(up ? 0 : -maxSteerVal, 1);
+                        break;
+                    case "ArrowLeft": // left
+                        self.vehicle.setSteeringValue(up ? 0 : maxSteerVal, 0);
+                        self.vehicle.setSteeringValue(up ? 0 : maxSteerVal, 1);
+                        break;
+
+                }
+            }
+
+            var up = (event.type == 'keyup');
+            if (!up && event.type !== 'keydown') {
+                return;
+            }
+        });
+    }
+
+
+
 
     animate() {
         const app = this;
@@ -144,6 +202,7 @@ class App {
         this.world.step(this.fixedTimeStep);
 
         this.updateBodies(this.world);
+        this.moveCar();
 
         this.renderer.render(this.scene, this.camera);
     }
