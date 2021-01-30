@@ -41,12 +41,13 @@ class App {
 
         world.broadphase = new CANNON.NaiveBroadphase(); //Collision detection
         world.gravity.set(0, -10, 0); //WebGL orientation gravity on Y axis
+        world.defaultContactMaterial.friction = 0;
 
         //GROUND MATERIAL
         const groundMaterial = new CANNON.Material("groundMaterial");
         const wheelMaterial = new CANNON.Material("wheelMaterial");
         const wheelGroundContactMaterial = new CANNON.ContactMaterial(wheelMaterial, groundMaterial, {
-            friction: 1000,
+            friction: .3,
             restitution: 0,
             contactEquationStiffness: 1000
         });
@@ -55,10 +56,10 @@ class App {
         world.addContactMaterial(wheelGroundContactMaterial);
 
         //CAR SHAPE
-        const carShape = new CANNON.Box(new CANNON.Vec3(2, 1, 3));
+        const carShape = new CANNON.Box(new CANNON.Vec3(1, .5, 2));
         const carBody = new CANNON.Body({ mass: 150, material: groundMaterial });
         carBody.addShape(carShape);
-        carBody.position.set(0, 10, 0);
+        carBody.position.set(0, 4, 0);
         this.helper.addVisual(carBody, 'car');
 
         //CAR OBJECT
@@ -66,12 +67,12 @@ class App {
             chassisBody: carBody,
             indexRightAxis: 0,
             indexUpAxis: 1,
-            indeForwardAxis: 2
+            indexForwardAxis: 2,
         });
 
         //WHEELS ->Code from cannon.js
         const options = {
-            radius: 1,
+            radius: .5,
             directionLocal: new CANNON.Vec3(0, -1, 0),
             suspensionStiffness: 30,
             suspensionRestLength: 0.3,
@@ -88,13 +89,13 @@ class App {
         };
 
         //WHEELS POSITION
-        options.chassisConnectionPointLocal.set(2, -1, -2);
+        options.chassisConnectionPointLocal.set(1, 0, -1);
         vehicle.addWheel(options);
-        options.chassisConnectionPointLocal.set(-2, -1, -2);
+        options.chassisConnectionPointLocal.set(-1, 0, -1);
         vehicle.addWheel(options);
-        options.chassisConnectionPointLocal.set(2, -1, 2);
+        options.chassisConnectionPointLocal.set(1, 0, 1);
         vehicle.addWheel(options);
-        options.chassisConnectionPointLocal.set(-2, -1, 2);
+        options.chassisConnectionPointLocal.set(-1, 0, 1);
         vehicle.addWheel(options);
 
         vehicle.addToWorld(world);
@@ -143,8 +144,13 @@ class App {
         document.addEventListener('keydown', function(event) {
 
             var maxSteerVal = .5;
-            var maxForce = 500;
-            var breakForce = 100;
+            var maxForce = 1000;
+            var breakForce = 10;
+
+            var up = (event.type == 'keyup');
+            if (!up && event.type !== 'keydown') {
+                return;
+            }
 
             self.vehicle.setBrake(0, 0);
             self.vehicle.setBrake(0, 1);
@@ -155,7 +161,6 @@ class App {
                 switch (event.key) {
 
                     case "ArrowUp": // forward
-                        console.log("Avanza");
                         self.vehicle.applyEngineForce(up ? 0 : -maxForce, 2);
                         self.vehicle.applyEngineForce(up ? 0 : -maxForce, 3);
                         break;
@@ -183,15 +188,9 @@ class App {
                 }
             }
 
-            var up = (event.type == 'keyup');
-            if (!up && event.type !== 'keydown') {
-                return;
-            }
+
         });
     }
-
-
-
 
     animate() {
         const app = this;
