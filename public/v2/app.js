@@ -26,6 +26,23 @@ class App {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(this.renderer.domElement);
 
+        //SHADOWS
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        light.castShadow = true;
+        const lightSize = 10;
+
+        light.shadow.camera.near = 1;
+        light.shadow.camera.far = 100;
+        light.shadow.camera.left = light.shadow.camera.bottom = -lightSize;
+        light.shadow.camera.right = light.shadow.camera.top = lightSize;
+
+        light.shadow.mapSize.width = 1024;
+        light.shadow.mapSize.height = 1024;
+
+        this.sun = light;
+        this.scene.add(light);
+
         this.helper = new Auxiliar(this.scene);
         this.fixedTimeStep = 1.0 / 60.0;
 
@@ -187,8 +204,6 @@ class App {
 
                 }
             }
-
-
         });
     }
 
