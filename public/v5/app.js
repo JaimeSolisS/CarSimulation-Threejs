@@ -33,12 +33,12 @@ class App {
         this.scene.background = new THREE.Color('rgb(0,0,0)');
 
         // LIGHTS
-        const ambient = new THREE.AmbientLight('rgb(136,136,136)');
+        const ambient = new THREE.AmbientLight('rgb(255,255,255)');
         this.scene.add(ambient);
 
-        const light = new THREE.DirectionalLight('rgb(221,221,221)');
-        light.position.set(30, 100, 40);
-        light.target.position.set(0, 0, 0);
+        const light = new THREE.DirectionalLight('rgb(255,255,255)');
+        light.position.set(1000, 2000, 0);
+
 
         light.castShadow = true;
 
