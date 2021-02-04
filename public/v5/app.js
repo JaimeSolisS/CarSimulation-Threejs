@@ -6,12 +6,12 @@ class App {
 
         const options = {
             assets: [
-                "../assets/textures/nx.png",
-                "../assets/textures/px.png",
-                "../assets/textures/ny.png",
-                "../assets/textures/py.png",
-                "../assets/textures/nz.png",
-                "../assets/textures/pz.png"
+                "../assets/textures/nx.jpg",
+                "../assets/textures/px.jpg",
+                "../assets/textures/ny.jpg",
+                "../assets/textures/py.jpg",
+                "../assets/textures/nz.jpg",
+                "../assets/textures/pz.jpg"
             ],
             oncomplete: function() {
                 app.init();
@@ -102,31 +102,17 @@ class App {
                 app.scene.add(object);
 
 
-                /*
+
                 const tloader = new THREE.CubeTextureLoader();
-                tloader.setPath('../assets/images/');
+                tloader.setPath('../assets/textures/');
 
                 var textureCube = tloader.load([
-                    'px.png', 'nx.png',
-                    'py.png', 'ny.png',
-                    'pz.png', 'nz.png'
+                    'px.jpg', 'nx.jpg',
+                    'py.jpg', 'ny.jpg',
+                    'pz.jpg', 'nz.jpg'
                 ]);
 
                 app.scene.background = textureCube;
-                */
-
-
-                const tloader = new THREE.TextureLoader();
-                tloader.setPath('../assets/textures/');
-
-                const texture = tloader.load(
-                    'equi.png',
-                    () => {
-                        const rt = new THREE.WebGLCubeRenderTarget(texture.image.height);
-                        rt.fromEquirectangularTexture(app.renderer, texture);
-                        app.scene.background = rt;
-                    });
-
 
                 app.initPhysics();
             },
