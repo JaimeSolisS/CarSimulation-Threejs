@@ -62,9 +62,10 @@ class App {
         this.renderer.shadowMap.enabled = true;
 
 
-        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-        this.controls.enableZoom = true;
-        this.controls.enablePan = true;
+        /* this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+         this.controls.enableZoom = true;
+         this.controls.enablePan = true;
+         */
 
 
         this.loadAssets();
