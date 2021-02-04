@@ -6,12 +6,12 @@ class App {
 
         const options = {
             assets: [
-                "../assets/textures/nx.jpg",
-                "../assets/textures/px.jpg",
-                "../assets/textures/ny.jpg",
-                "../assets/textures/py.jpg",
-                "../assets/textures/nz.jpg",
-                "../assets/textures/pz.jpg"
+                "../assets/textures/nx.png",
+                "../assets/textures/px.png",
+                "../assets/textures/ny.png",
+                "../assets/textures/py.png",
+                "../assets/textures/nz.png",
+                "../assets/textures/pz.png"
             ],
             oncomplete: function() {
                 app.init();
@@ -20,27 +20,23 @@ class App {
         }
 
         const preloader = new Preloader(options);
-
-        window.onError = function(error) {
-            console.error(JSON.stringify(error));
-        }
     }
 
     init() {
 
         //CREATE CAMERA
         this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 100000);
-        this.camera.position.set(0, 60, 400);
+        this.camera.position.set(0, 5, -40);
 
         //CREATE SCENE
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color('rgb(0,0,0)');
 
         // LIGHTS
-        const ambient = new THREE.AmbientLight(0xaaaaaa);
+        const ambient = new THREE.AmbientLight('rgb(136,136,136)');
         this.scene.add(ambient);
 
-        const light = new THREE.DirectionalLight(0xaaaaaa);
+        const light = new THREE.DirectionalLight('rgb(221,221,221)');
         light.position.set(30, 100, 40);
         light.target.position.set(0, 0, 0);
 
@@ -89,6 +85,10 @@ class App {
                     if (child.isMesh) {
                         if (child.name == "car") {
                             app.car = { chassis: child };
+                            app.followCam = new THREE.Object3D();
+                            app.followCam.position.copy(app.camera.position);
+                            app.scene.add(app.followCam)
+                            app.followCam.parent = child;
                             app.sun.target = child; //light for car objetc
                             child.castShadow = true;
                             receiveShadow = false;
@@ -272,6 +272,24 @@ class App {
         });
     }
 
+    updateCamera() {
+        if (this.followCam === undefined) return;
+        const pos = this.car.chassis.position.clone();
+        pos.y += 0.3;
+        if (this.controls !== undefined) {
+            this.controls.target.copy(pos);
+            this.controls.update();
+        } else {
+            this.camera.position.lerp(this.followCam.getWorldPosition(new THREE.Vector3()), 0.05);
+            if (this.camera.position.y < 1) this.camera.position.y = 1;
+            this.camera.lookAt(pos);
+        }
+
+        if (this.sun != undefined) {
+            this.sun.position.copy(this.camera.position);
+            this.sun.position.y += 10;
+        }
+    }
 
     animate() {
         const app = this;
@@ -305,7 +323,7 @@ class App {
 
 
         }
-
+        this.updateCamera();
         this.renderer.render(this.scene, this.camera);
 
     }
