@@ -61,9 +61,11 @@ class App {
         document.body.appendChild(this.renderer.domElement);
         this.renderer.shadowMap.enabled = true;
 
+
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableZoom = true;
         this.controls.enablePan = true;
+
 
         this.loadAssets();
         this.helper = new Auxiliar(this.scene);
@@ -127,7 +129,7 @@ class App {
         this.physics = {};
 
         const app = this;
-        const mass = 150;
+        const mass = 9000;
         const world = new CANNON.World();
         this.world = world;
 
@@ -146,10 +148,10 @@ class App {
         // We must add the contact materials to the world
         world.addContactMaterial(wheelGroundContactMaterial);
 
-        const chassisShape = new CANNON.Box(new CANNON.Vec3(8, 4, 16));
+        const chassisShape = new CANNON.Box(new CANNON.Vec3(60, 28, 120));
         const chassisBody = new CANNON.Body({ mass: mass });
         const pos = this.car.chassis.position.clone();
-        //pos.y += 1;
+
         chassisBody.addShape(chassisShape);
         chassisBody.position.copy(pos);
         chassisBody.angularVelocity.set(0, 0, 0);
@@ -157,7 +159,7 @@ class App {
         this.helper.addVisual(chassisBody, 'car');
 
         const options = {
-            radius: 10,
+            radius: 28,
             directionLocal: new CANNON.Vec3(0, -1, 0),
             suspensionStiffness: 45,
             suspensionRestLength: 0.4,
@@ -169,7 +171,7 @@ class App {
             axleLocal: new CANNON.Vec3(-1, 0, 0),
             chassisConnectionPointLocal: new CANNON.Vec3(1, 1, 0),
             maxSuspensionTravel: 0.25,
-            customSlidingRotationalSpeed: -30,
+            customSlidingRotationalSpeed: -300,
             useCustomSlidingRotationalSpeed: true
         };
 
@@ -181,17 +183,17 @@ class App {
             indexForwardAxis: 2
         });
 
-        const axlewidth = 16;
-        options.chassisConnectionPointLocal.set(axlewidth, 0, -16);
+        const axlewidth = 60;
+        options.chassisConnectionPointLocal.set(axlewidth, -10, -80);
         vehicle.addWheel(options);
 
-        options.chassisConnectionPointLocal.set(-axlewidth, 0, -16);
+        options.chassisConnectionPointLocal.set(-axlewidth, -10, -80);
         vehicle.addWheel(options);
 
-        options.chassisConnectionPointLocal.set(axlewidth, 0, 16);
+        options.chassisConnectionPointLocal.set(axlewidth, -10, 125);
         vehicle.addWheel(options);
 
-        options.chassisConnectionPointLocal.set(-axlewidth, 0, 16);
+        options.chassisConnectionPointLocal.set(-axlewidth, -10, 125);
         vehicle.addWheel(options);
 
         vehicle.addToWorld(world);
@@ -236,33 +238,28 @@ class App {
 
     moveCar() {
         const self = this;
+        const maxSteerVal = .7;
+        const maxForce = 30000000;
+        const breakForce = 600;
+
+        self.vehicle.setBrake(0, 0);
+        self.vehicle.setBrake(0, 1);
+        self.vehicle.setBrake(0, 3);
+        self.vehicle.setBrake(0, 2);
+
         document.addEventListener('keydown', function(event) {
-
-            var maxSteerVal = .5;
-            var maxForce = 100000;
-            var breakForce = 10;
-
-            var up = (event.type == 'keyup');
-            if (!up && event.type !== 'keydown') {
-                return;
-            }
-
-            self.vehicle.setBrake(0, 0);
-            self.vehicle.setBrake(0, 1);
-            self.vehicle.setBrake(0, 3);
-            self.vehicle.setBrake(0, 2);
 
             if (event.key) {
                 switch (event.key) {
 
                     case "ArrowUp": // forward
-                        self.vehicle.applyEngineForce(up ? 0 : -maxForce, 2);
-                        self.vehicle.applyEngineForce(up ? 0 : -maxForce, 3);
+                        self.vehicle.applyEngineForce(-maxForce, 2);
+                        self.vehicle.applyEngineForce(-maxForce, 3);
                         break;
 
                     case "ArrowDown": // backward
-                        self.vehicle.applyEngineForce(up ? 0 : maxForce, 2);
-                        self.vehicle.applyEngineForce(up ? 0 : maxForce, 3);
+                        self.vehicle.applyEngineForce(maxForce / 10, 2);
+                        self.vehicle.applyEngineForce(maxForce / 10, 3);
                         break;
 
                     case " ": //brake
@@ -272,16 +269,26 @@ class App {
                         self.vehicle.setBrake(breakForce, 3);
                         break;
                     case "ArrowRight": // right
-                        self.vehicle.setSteeringValue(up ? 0 : -maxSteerVal, 0);
-                        self.vehicle.setSteeringValue(up ? 0 : -maxSteerVal, 1);
+                        self.vehicle.setSteeringValue(-maxSteerVal, 0);
+                        self.vehicle.setSteeringValue(-maxSteerVal, 1);
                         break;
                     case "ArrowLeft": // left
-                        self.vehicle.setSteeringValue(up ? 0 : maxSteerVal, 0);
-                        self.vehicle.setSteeringValue(up ? 0 : maxSteerVal, 1);
+                        self.vehicle.setSteeringValue(maxSteerVal, 0);
+                        self.vehicle.setSteeringValue(maxSteerVal, 1);
                         break;
 
                 }
             }
+        });
+
+        document.addEventListener('keyup', function(event) {
+
+            self.vehicle.applyEngineForce(0, 2);
+            self.vehicle.applyEngineForce(0, 3);
+            self.vehicle.setSteeringValue(0, 0);
+            self.vehicle.setSteeringValue(0, 1);
+
+
         });
     }
 
@@ -465,8 +472,8 @@ class Auxiliar {
     //Default Settings to construct an object I guess
     addVisual(body, name, castShadow = true, receiveShadow = true) {
         body.name = name;
-        // if (this.currentMaterial === undefined) this.currentMaterial = new THREE.MeshLambertMaterial({ color: 0x888888 });
-        if (this.currentMaterial === undefined) this.currentMaterial = new THREE.MeshLambertMaterial({ color: 'rgb(0,0,0)' });
+        //if (this.currentMaterial === undefined) this.currentMaterial = new THREE.MeshLambertMaterial({ color: 0x888888 });
+        if (this.currentMaterial === undefined) this.currentMaterial = new THREE.MeshLambertMaterial({ color: 'rgb(44,43,43)' });
         if (this.settings === undefined) {
             this.settings = {
                 stepFrequency: 60,
