@@ -25,8 +25,8 @@ npm start
 ## Referencias
 ### Recursos 
 * [Modelo Low-Poly Car](https://free3d.com/3d-model/low-poly-car-40967.html) 
-* [Modelo Ciudad] (https://www.cgtrader.com/free-3d-models/exterior/cityscape/huge-city-650f132b-0c56-49df-8828-d8959fd7b33f)
-* [Texturas] (https://www.humus.name/index.php?page=Cubemap&item=Yokohama2)
+* [Modelo Ciudad](https://www.cgtrader.com/free-3d-models/exterior/cityscape/huge-city-650f132b-0c56-49df-8828-d8959fd7b33f)
+* [Texturas](https://www.humus.name/index.php?page=Cubemap&item=Yokohama2)
 ### Librerías
 * [three.js](https://threejs.org/) 
 * [cannon.js](https://schteppe.github.io/cannon.js/) 
