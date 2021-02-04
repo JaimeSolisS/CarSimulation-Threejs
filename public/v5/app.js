@@ -61,9 +61,9 @@ class App {
         document.body.appendChild(this.renderer.domElement);
         this.renderer.shadowMap.enabled = true;
 
-        //this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-        //this.controls.enableZoom = true;
-        //this.controls.enablePan = true;
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableZoom = true;
+        this.controls.enablePan = true;
 
         this.loadAssets();
         this.helper = new Auxiliar(this.scene);
@@ -100,6 +100,33 @@ class App {
 
                 app.assets = object;
                 app.scene.add(object);
+
+
+                /*
+                const tloader = new THREE.CubeTextureLoader();
+                tloader.setPath('../assets/images/');
+
+                var textureCube = tloader.load([
+                    'px.png', 'nx.png',
+                    'py.png', 'ny.png',
+                    'pz.png', 'nz.png'
+                ]);
+
+                app.scene.background = textureCube;
+                */
+
+
+                const tloader = new THREE.TextureLoader();
+                tloader.setPath('../assets/textures/');
+
+                const texture = tloader.load(
+                    'equi.png',
+                    () => {
+                        const rt = new THREE.WebGLCubeRenderTarget(texture.image.height);
+                        rt.fromEquirectangularTexture(app.renderer, texture);
+                        app.scene.background = rt;
+                    });
+
 
                 app.initPhysics();
             },
