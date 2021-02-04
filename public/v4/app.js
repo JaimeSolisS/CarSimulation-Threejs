@@ -37,7 +37,7 @@ class App {
         const app = this;
 
         //load method (fbx file path, load method (what we want to do once the objetc is loaded), progress as it is downloaded, error)
-        loader.load("../assets/cityCar.fbx", function(object) {
+        loader.load("../assets/cityCarV4.fbx", function(object) {
             app.car = object;
             app.scene.add(object);
             //camera moves with mouse control
@@ -54,6 +54,17 @@ class App {
         }, null, function(error) {
             console.error(error);
         })
+
+        const tloader = new THREE.CubeTextureLoader();
+        tloader.setPath('../assets/textures/');
+
+        var textureCube = tloader.load([
+            'px.jpg', 'nx.jpg',
+            'py.jpg', 'ny.jpg',
+            'pz.jpg', 'nz.jpg'
+        ]);
+
+        app.scene.background = textureCube;
     }
 
     animate() {
