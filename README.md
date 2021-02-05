@@ -1,7 +1,6 @@
-# TC3022_Final_Project
+# TC3022_Proyecto_Gráficas Computacionales
 
-![WebGL](https://img.shields.io/badge/-WebGL-red) ![three.js](https://img.shields.io/badge/-three.js-blue) ![cannon.js](https://img.shields.io/badge/-cannon.js-lightgrey) 
-
+![WebGL](https://img.shields.io/badge/-WebGL-red) ![three.js](https://img.shields.io/badge/-three.js-blue) ![cannon.js](https://img.shields.io/badge/-cannon.js-lightgrey) ![blender](https://img.shields.io/badge/-blender-orange)
 ## Descripción
 * La escena representa una ciudad con un auto y algunos edificios. 
 * El auto fue diseñado en Blender y el modelo de la ciudad fue descargado de cgtrader.com (todos los links se encuentran en las referencias). 
