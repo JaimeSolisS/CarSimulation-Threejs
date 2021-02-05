@@ -38,7 +38,7 @@ class App {
 
 
         const light = new THREE.DirectionalLight('rgb(255,255,255)');
-        light.position.set(.1, .02, .1);
+        light.position.set(100, 200, .1);
 
 
         //const directionalLightHelper = new THREE.DirectionalLightHelper(light);
@@ -100,9 +100,7 @@ class App {
                         } else {
                             child.castShadow = receiveShadow;
                         }
-
-
-                    }
+                    } else child.castShadow = receiveShadow;
                 });
 
                 app.assets = object;
@@ -273,11 +271,11 @@ class App {
                         self.vehicle.setBrake(breakForce, 2);
                         self.vehicle.setBrake(breakForce, 3);
                         break;
-                    case "ArrowRight": // right
+                    case "ArrowLeft": // left
                         self.vehicle.setSteeringValue(-maxSteerVal, 0);
                         self.vehicle.setSteeringValue(-maxSteerVal, 1);
                         break;
-                    case "ArrowLeft": // left
+                    case "ArrowRight": // right
                         self.vehicle.setSteeringValue(maxSteerVal, 0);
                         self.vehicle.setSteeringValue(maxSteerVal, 1);
                         break;
