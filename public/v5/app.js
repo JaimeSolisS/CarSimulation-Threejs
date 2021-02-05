@@ -36,19 +36,21 @@ class App {
         const ambient = new THREE.AmbientLight('rgb(255,255,255)', .8);
         this.scene.add(ambient);
 
-        const light = new THREE.DirectionalLight('rgb(255,255,255)');
-        light.position.set(1000, 2000, 0);
 
-        /*
-        const directionalLightHelper = new THREE.DirectionalLightHelper(light);
-        this.scene.add(directionalLightHelper);
-        */
+        const light = new THREE.DirectionalLight('rgb(255,255,255)');
+        light.position.set(.1, .02, .1);
+
+
+        //const directionalLightHelper = new THREE.DirectionalLightHelper(light);
+        //this.scene.add(directionalLightHelper);
+
+
 
         light.castShadow = true;
 
-        const lightSize = 1;
-        light.shadow.camera.near = 1;
-        light.shadow.camera.far = 5000;
+        const lightSize = 30;
+        light.shadow.camera.near = .1;
+        light.shadow.camera.far = 500;
         light.shadow.camera.left = light.shadow.camera.bottom = -lightSize;
         light.shadow.camera.right = light.shadow.camera.top = lightSize;
 
@@ -92,7 +94,7 @@ class App {
                             app.followCam.position.copy(app.camera.position);
                             app.scene.add(app.followCam)
                             app.followCam.parent = child;
-                            app.sun.target = child; //light for car objetc
+                            //app.sun.target = child; //light for car objetc
                             child.castShadow = true;
                             receiveShadow = false;
                         } else {
