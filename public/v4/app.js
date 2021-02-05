@@ -18,15 +18,14 @@ class App {
 
         //SET LIGHTS
         const light = new THREE.DirectionalLight("rgb(255, 255, 255)");
-        light.position.set(1000, 2000, 0);
+        light.position.set(500, 2000, 0);
+        this.scene.add(light);
 
 
-        /* const directionalLightHelper = new THREE.DirectionalLightHelper(light);
-         this.scene.add(directionalLightHelper);
-         */
+        //const directionalLightHelper = new THREE.DirectionalLightHelper(light);
+        //this.scene.add(directionalLightHelper);
 
         const ambient = new THREE.AmbientLight("rgb(255, 255, 255)", 0.5);
-        this.scene.add(light);
         this.scene.add(ambient);
 
         //SPIN CAMERA
@@ -46,7 +45,8 @@ class App {
 
             object.traverse(function(child) {
                 if (child.isMesh) {
-                    child.castShadow = child.receiveShadow = true;
+                    child.castShadow = true;
+                    const receiveShadow = false;
                 }
             });
             app.animate();
@@ -65,6 +65,8 @@ class App {
         ]);
 
         app.scene.background = textureCube;
+
+
     }
 
     animate() {
