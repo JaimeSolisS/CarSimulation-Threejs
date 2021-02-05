@@ -237,6 +237,31 @@ class App {
         this.helper.addVisual(groundBody, 'ground', false, true);
         this.groundMaterial = groundMaterial; //ground material is an app property
 
+        this.createColliders();
+
+    }
+
+    createColliders() {
+        const app = this;
+        const world = this.world;
+        const scaleAdjust = 1;
+        const multiplier = 45 * scaleAdjust;
+        this.assets.children.forEach(function(child) {
+            if (child.isMesh && child.name.includes("collider")) {
+                const boundingBox = new THREE.Box3().setFromObject(child);
+                const size = boundingBox.getSize()
+                    //console.log(size);
+                child.visible = false;
+                const halfExtents = new CANNON.Vec3(size.x / 2, size.z / 2, size.y / 2);
+                const box = new CANNON.Box(halfExtents);
+                const body = new CANNON.Body({ mass: 0 });
+                body.addShape(box);
+                body.position.copy(child.position);
+                body.quaternion.copy(child.quaternion);
+                world.add(body);
+                //app.helper.addVisual(body, 'ground', false, true);
+            }
+        })
     }
 
     moveCar() {
