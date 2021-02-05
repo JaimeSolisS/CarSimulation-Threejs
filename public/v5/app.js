@@ -26,25 +26,27 @@ class App {
 
         //CREATE CAMERA
         this.camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 100000);
-        this.camera.position.set(0, 5, -40);
+        this.camera.position.set(0, 2, -15);
 
         //CREATE SCENE
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color('rgb(0,0,0)');
 
         // LIGHTS
-        const ambient = new THREE.AmbientLight('rgb(255,255,255)');
+        const ambient = new THREE.AmbientLight('rgb(255,255,255)', .8);
         this.scene.add(ambient);
 
         const light = new THREE.DirectionalLight('rgb(255,255,255)');
         light.position.set(1000, 2000, 0);
 
+        const directionalLightHelper = new THREE.DirectionalLightHelper(light);
+        this.scene.add(directionalLightHelper);
 
         light.castShadow = true;
 
-        const lightSize = 30;
+        const lightSize = 1;
         light.shadow.camera.near = 1;
-        light.shadow.camera.far = 500;
+        light.shadow.camera.far = 5000;
         light.shadow.camera.left = light.shadow.camera.bottom = -lightSize;
         light.shadow.camera.right = light.shadow.camera.top = lightSize;
 
@@ -62,10 +64,10 @@ class App {
         this.renderer.shadowMap.enabled = true;
 
 
-        /* this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-         this.controls.enableZoom = true;
-         this.controls.enablePan = true;
-         */
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableZoom = true;
+        this.controls.enablePan = true;
+
 
 
         this.loadAssets();
@@ -77,12 +79,8 @@ class App {
         const app = this;
         const loader = new THREE.FBXLoader();
 
-        loader.load('../assets/cityCar.fbx',
+        loader.load('../assets/cityCarForV5Small.fbx',
             function(object) {
-                let material, map, index, maps;
-                const euler = new THREE.Euler();
-
-
                 object.traverse(function(child) { //loop through all children
                     let receiveShadow = true;
                     if (child.isMesh) {
@@ -95,9 +93,11 @@ class App {
                             app.sun.target = child; //light for car objetc
                             child.castShadow = true;
                             receiveShadow = false;
+                        } else {
+                            child.castShadow = receiveShadow;
                         }
 
-                        child.receiveShadow = receiveShadow;
+
                     }
                 });
 
@@ -149,7 +149,7 @@ class App {
         // We must add the contact materials to the world
         world.addContactMaterial(wheelGroundContactMaterial);
 
-        const chassisShape = new CANNON.Box(new CANNON.Vec3(60, 28, 120));
+        const chassisShape = new CANNON.Box(new CANNON.Vec3(1, .3, 2));
         const chassisBody = new CANNON.Body({ mass: mass });
         const pos = this.car.chassis.position.clone();
 
@@ -160,7 +160,7 @@ class App {
         this.helper.addVisual(chassisBody, 'car');
 
         const options = {
-            radius: 28,
+            radius: .3,
             directionLocal: new CANNON.Vec3(0, -1, 0),
             suspensionStiffness: 45,
             suspensionRestLength: 0.4,
@@ -184,17 +184,17 @@ class App {
             indexForwardAxis: 2
         });
 
-        const axlewidth = 60;
-        options.chassisConnectionPointLocal.set(axlewidth, -10, -80);
+        const axlewidth = .8;
+        options.chassisConnectionPointLocal.set(axlewidth, 0, -1);
         vehicle.addWheel(options);
 
-        options.chassisConnectionPointLocal.set(-axlewidth, -10, -80);
+        options.chassisConnectionPointLocal.set(-axlewidth, 0, -1);
         vehicle.addWheel(options);
 
-        options.chassisConnectionPointLocal.set(axlewidth, -10, 125);
+        options.chassisConnectionPointLocal.set(axlewidth, 0, 1);
         vehicle.addWheel(options);
 
-        options.chassisConnectionPointLocal.set(-axlewidth, -10, 125);
+        options.chassisConnectionPointLocal.set(-axlewidth, 0, 1);
         vehicle.addWheel(options);
 
         vehicle.addToWorld(world);
@@ -325,8 +325,8 @@ class App {
 
         if (this.world !== undefined) {
             this.moveCar();
-            this.car.chassis.position.copy(this.vehicle.chassisBody.position.clone());
-            this.car.chassis.quaternion.copy(this.vehicle.chassisBody.quaternion.clone());
+            // this.car.chassis.position.copy(this.vehicle.chassisBody.position.clone());
+            //this.car.chassis.quaternion.copy(this.vehicle.chassisBody.quaternion.clone());
 
             this.world.step(this.fixedTimeStep, dt, 10);
 
