@@ -39,8 +39,10 @@ class App {
         const light = new THREE.DirectionalLight('rgb(255,255,255)');
         light.position.set(1000, 2000, 0);
 
+        /*
         const directionalLightHelper = new THREE.DirectionalLightHelper(light);
         this.scene.add(directionalLightHelper);
+        */
 
         light.castShadow = true;
 
@@ -63,11 +65,11 @@ class App {
         document.body.appendChild(this.renderer.domElement);
         this.renderer.shadowMap.enabled = true;
 
-
+        /*
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableZoom = true;
         this.controls.enablePan = true;
-
+        */
 
 
         this.loadAssets();
@@ -130,7 +132,7 @@ class App {
         this.physics = {};
 
         const app = this;
-        const mass = 9000;
+        const mass = 150;
         const world = new CANNON.World();
         this.world = world;
 
@@ -152,15 +154,15 @@ class App {
         const chassisShape = new CANNON.Box(new CANNON.Vec3(1, .3, 2));
         const chassisBody = new CANNON.Body({ mass: mass });
         const pos = this.car.chassis.position.clone();
-
         chassisBody.addShape(chassisShape);
+
         chassisBody.position.copy(pos);
         chassisBody.angularVelocity.set(0, 0, 0);
         //chassisBody.threemesh = this.car.chassis;
         this.helper.addVisual(chassisBody, 'car');
 
         const options = {
-            radius: .3,
+            radius: .45,
             directionLocal: new CANNON.Vec3(0, -1, 0),
             suspensionStiffness: 45,
             suspensionRestLength: 0.4,
@@ -172,7 +174,7 @@ class App {
             axleLocal: new CANNON.Vec3(-1, 0, 0),
             chassisConnectionPointLocal: new CANNON.Vec3(1, 1, 0),
             maxSuspensionTravel: 0.25,
-            customSlidingRotationalSpeed: -300,
+            customSlidingRotationalSpeed: -30,
             useCustomSlidingRotationalSpeed: true
         };
 
@@ -184,17 +186,17 @@ class App {
             indexForwardAxis: 2
         });
 
-        const axlewidth = .8;
-        options.chassisConnectionPointLocal.set(axlewidth, 0, -1);
+        const axlewidth = 1;
+        options.chassisConnectionPointLocal.set(axlewidth, -.3, -1.75);
         vehicle.addWheel(options);
 
-        options.chassisConnectionPointLocal.set(-axlewidth, 0, -1);
+        options.chassisConnectionPointLocal.set(-axlewidth, -.3, -1.75);
         vehicle.addWheel(options);
 
-        options.chassisConnectionPointLocal.set(axlewidth, 0, 1);
+        options.chassisConnectionPointLocal.set(axlewidth, -.3, 1.7);
         vehicle.addWheel(options);
 
-        options.chassisConnectionPointLocal.set(-axlewidth, 0, 1);
+        options.chassisConnectionPointLocal.set(-axlewidth, -.3, 1.7);
         vehicle.addWheel(options);
 
         vehicle.addToWorld(world);
@@ -202,7 +204,7 @@ class App {
         const wheelBodies = [];
 
         vehicle.wheelInfos.forEach(function(wheel) {
-            const cylinderShape = new CANNON.Cylinder(wheel.radius, wheel.radius, wheel.radius / 2, 20);
+            const cylinderShape = new CANNON.Cylinder(wheel.radius, wheel.radius, wheel.radius - .15, 20);
             const wheelBody = new CANNON.Body({ mass: 1 });
             const q = new CANNON.Quaternion();
             q.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), Math.PI / 2);
@@ -240,7 +242,7 @@ class App {
     moveCar() {
         const self = this;
         const maxSteerVal = .7;
-        const maxForce = 30000000;
+        const maxForce = 600;
         const breakForce = 600;
 
         self.vehicle.setBrake(0, 0);
@@ -259,8 +261,8 @@ class App {
                         break;
 
                     case "ArrowDown": // backward
-                        self.vehicle.applyEngineForce(maxForce / 10, 2);
-                        self.vehicle.applyEngineForce(maxForce / 10, 3);
+                        self.vehicle.applyEngineForce(maxForce / 2, 2);
+                        self.vehicle.applyEngineForce(maxForce / 2, 3);
                         break;
 
                     case " ": //brake
@@ -325,8 +327,9 @@ class App {
 
         if (this.world !== undefined) {
             this.moveCar();
-            // this.car.chassis.position.copy(this.vehicle.chassisBody.position.clone());
-            //this.car.chassis.quaternion.copy(this.vehicle.chassisBody.quaternion.clone());
+
+            this.car.chassis.position.copy(this.vehicle.chassisBody.position.clone());
+            this.car.chassis.quaternion.copy(this.vehicle.chassisBody.quaternion.clone());
 
             this.world.step(this.fixedTimeStep, dt, 10);
 
